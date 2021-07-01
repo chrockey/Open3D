@@ -41,7 +41,7 @@ void TriuCPU(const Tensor &A, Tensor &output, const int diagonal) {
         int cols = A.GetShape()[1];
         int n = A.GetShape()[0] * cols;
 
-        kernel::cpu_launcher::LaunchParallel(
+        kernel::cpu_launcher::ParallelFor(
                 n, kernel::cpu_launcher::SMALL_OP_MIN_PARALLEL_SIZE,
                 [&] OPEN3D_DEVICE(int64_t workload_idx) {
                     const int64_t idx = workload_idx / cols;
@@ -62,7 +62,7 @@ void TrilCPU(const Tensor &A, Tensor &output, const int diagonal) {
         int cols = A.GetShape()[1];
         int n = A.GetShape()[0] * cols;
 
-        kernel::cpu_launcher::LaunchParallel(
+        kernel::cpu_launcher::ParallelFor(
                 n, kernel::cpu_launcher::SMALL_OP_MIN_PARALLEL_SIZE,
                 [&] OPEN3D_DEVICE(int64_t workload_idx) {
                     const int64_t idx = workload_idx / cols;
@@ -87,7 +87,7 @@ void TriulCPU(const Tensor &A,
         int cols = A.GetShape()[1];
         int n = A.GetShape()[0] * cols;
 
-        kernel::cpu_launcher::LaunchParallel(
+        kernel::cpu_launcher::ParallelFor(
                 n, kernel::cpu_launcher::SMALL_OP_MIN_PARALLEL_SIZE,
                 [&] OPEN3D_DEVICE(int64_t workload_idx) {
                     const int64_t idx = workload_idx / cols;

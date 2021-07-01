@@ -49,7 +49,7 @@ static constexpr int64_t SMALL_OP_MIN_PARALLEL_SIZE = 32767;
 /// \param func The function to be executed in parallel. The function should
 /// take an int64_t workload index and returns void, i.e., `void func(int64_t)`.
 ///
-/// This is typically used together with cuda_launcher::LaunchParallel() to
+/// This is typically used together with cuda_launcher::ParallelFor() to
 /// share the same code between CPU and CUDA. For example:
 ///
 /// ```cpp
@@ -59,12 +59,12 @@ static constexpr int64_t SMALL_OP_MIN_PARALLEL_SIZE = 32767;
 ///     namespace launcher = core::kernel::cpu_launcher;
 /// #endif
 ///
-/// launcher::LaunchParallel(num_workloads, [=] OPEN3D_DEVICE(int64_t i) {
+/// launcher::ParallelFor(num_workloads, [=] OPEN3D_DEVICE(int64_t i) {
 ///     process_workload(i);
 /// });
 /// ```
 template <typename func_t>
-void LaunchParallel(int64_t n, const func_t& func) {
+void ParallelFor(int64_t n, const func_t& func) {
 #pragma omp parallel for if (GetMaxThreads() != 1 && !InParallel())
     for (int64_t i = 0; i < n; ++i) {
         func(i);
@@ -80,7 +80,7 @@ void LaunchParallel(int64_t n, const func_t& func) {
 /// \param func The function to be executed in parallel. The function should
 /// take an int64_t workload index and returns void, i.e., `void func(int64_t)`.
 template <typename func_t>
-void LaunchParallel(int64_t n, int64_t min_parallel_size, const func_t& func) {
+void ParallelFor(int64_t n, int64_t min_parallel_size, const func_t& func) {
 #pragma omp parallel for schedule(static) if (n > min_parallel_size && \
                                               GetMaxThreads() != 1 &&  \
                                               !InParallel())
@@ -98,36 +98,36 @@ void LaunchParallel(int64_t n, int64_t min_parallel_size, const func_t& func) {
 /// pointer location.
 template <typename func_t>
 void LaunchIndexFillKernel(const Indexer& indexer, const func_t& func) {
-    LaunchParallel(indexer.NumWorkloads(), SMALL_OP_MIN_PARALLEL_SIZE,
-                   [&indexer, &func](int64_t i) {
-                       func(indexer.GetInputPtr(0, i), i);
-                   });
+    ParallelFor(indexer.NumWorkloads(), SMALL_OP_MIN_PARALLEL_SIZE,
+                [&indexer, &func](int64_t i) {
+                    func(indexer.GetInputPtr(0, i), i);
+                });
 }
 
 template <typename func_t>
 void LaunchUnaryEWKernel(const Indexer& indexer, const func_t& func) {
-    LaunchParallel(indexer.NumWorkloads(), SMALL_OP_MIN_PARALLEL_SIZE,
-                   [&indexer, &func](int64_t i) {
-                       func(indexer.GetInputPtr(0, i), indexer.GetOutputPtr(i));
-                   });
+    ParallelFor(indexer.NumWorkloads(), SMALL_OP_MIN_PARALLEL_SIZE,
+                [&indexer, &func](int64_t i) {
+                    func(indexer.GetInputPtr(0, i), indexer.GetOutputPtr(i));
+                });
 }
 
 template <typename func_t>
 void LaunchBinaryEWKernel(const Indexer& indexer, const func_t& func) {
-    LaunchParallel(indexer.NumWorkloads(), SMALL_OP_MIN_PARALLEL_SIZE,
-                   [&indexer, &func](int64_t i) {
-                       func(indexer.GetInputPtr(0, i),
-                            indexer.GetInputPtr(1, i), indexer.GetOutputPtr(i));
-                   });
+    ParallelFor(indexer.NumWorkloads(), SMALL_OP_MIN_PARALLEL_SIZE,
+                [&indexer, &func](int64_t i) {
+                    func(indexer.GetInputPtr(0, i), indexer.GetInputPtr(1, i),
+                         indexer.GetOutputPtr(i));
+                });
 }
 
 template <typename func_t>
 void LaunchAdvancedIndexerKernel(const AdvancedIndexer& indexer,
                                  const func_t& func) {
-    LaunchParallel(indexer.NumWorkloads(), SMALL_OP_MIN_PARALLEL_SIZE,
-                   [&indexer, &func](int64_t i) {
-                       func(indexer.GetInputPtr(i), indexer.GetOutputPtr(i));
-                   });
+    ParallelFor(indexer.NumWorkloads(), SMALL_OP_MIN_PARALLEL_SIZE,
+                [&indexer, &func](int64_t i) {
+                    func(indexer.GetInputPtr(i), indexer.GetOutputPtr(i));
+                });
 }
 
 }  // namespace cpu_launcher
