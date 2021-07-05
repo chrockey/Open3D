@@ -31,6 +31,7 @@ function run_benchmark {
     fi
 
     # BenchmarkRegistrationICP
+    NPROC=2
     echo "Running benchmarks from 1 to ${NPROC} threads."
     for (( i = 1 ; i <= ${NPROC} ; i++ ));
     do
@@ -66,7 +67,7 @@ NPROC=$(nproc)
 
 pushd ${BUILD_DIR}
 
-make benchmarks -j${NPROC}
+make benchmarks CPUConsumer -j${NPROC}
 run_benchmark
 run_benchmark with_dummy
 
