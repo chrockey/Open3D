@@ -14,9 +14,17 @@ function run_benchmark {
     rm -rf ${OUT_FILE}
     touch ${OUT_FILE}
 
-    # Pick all tensor-related benchmarks
-    # If there are multiple sets of benchmarks of the same code, only run one of them
-    BENCHMARK_FILTER="FromLegacyPointCloud|ToLegacyPointCloud|VoxelDownSample/core::HashmapBackend::TBB_0_01|Odometry|BenchmarkRegistrationICP/"
+    # Pick tensor-related benchmarks
+    # If one benchmark used multiple times with different parameters, pick only one of them
+    BENCHMARK_FILTER=""
+    BENCHMARK_FILTER="${BENCHMARK_FILTER}|HashInsertInt/HashmapBackend::TBB_1000000_1"
+    BENCHMARK_FILTER="${BENCHMARK_FILTER}|FromLegacyPointCloud"
+    BENCHMARK_FILTER="${BENCHMARK_FILTER}|ToLegacyPointCloud"
+    BENCHMARK_FILTER="${BENCHMARK_FILTER}|VoxelDownSample/core::HashmapBackend::TBB_0_01"
+    BENCHMARK_FILTER="${BENCHMARK_FILTER}|Odometry"
+    BENCHMARK_FILTER="${BENCHMARK_FILTER}|BenchmarkRegistrationICP/"
+    BENCHMARK_FILTER="${BENCHMARK_FILTER}|Zeros"
+    BENCHMARK_FILTER="${BENCHMARK_FILTER}|Reduction"
 
     # Start dummy loop (takes one thread)
     if [[ "with_dummy" =~ ^($options)$ ]]; then
@@ -24,9 +32,8 @@ function run_benchmark {
     fi
 
     # BenchmarkRegistrationICP
-    NPROC=2
     echo "Running benchmarks from 1 to ${NPROC} threads."
-    for (( i = ${NPROC} ; i >= 1 ; i-- ));
+    for (( i = 1 ; i <= ${NPROC} ; i++ ));
     do
         echo "######################################" >> ${OUT_FILE}
 
