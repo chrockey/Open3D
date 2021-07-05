@@ -28,6 +28,7 @@ do
 
     export OMP_NUM_THREADS=${i}
     echo "# OMP_NUM_THREADS: ${OMP_NUM_THREADS}"
+    echo "# OMP_NUM_THREADS: ${OMP_NUM_THREADS}" >> ${OUT_FILE}
 
     if [[ ${OMP_NUM_THREADS} = ${NPROC} ]]; then
         # Don't specify OMP_NUM_THREADS if it is the maximum already
