@@ -404,20 +404,34 @@ void EstimateCovariancesCUDA(const core::Tensor& points,
 
     core::nns::NearestNeighborSearch tree(points);
 
-    bool check = tree.HybridIndex(radius);
+    // bool check = tree.HybridIndex(radius);
+    // if (!check) {
+    //     utility::LogError(
+    //             "NearestNeighborSearch::FixedRadiusIndex Index is not set.");
+    // }
+
+    // core::Tensor indices, distance, counts;
+    // std::tie(indices, distance, counts) =
+    //         tree.HybridSearch(points, radius, max_nn);
+
+    bool check = tree.KnnIndex();
     if (!check) {
-        utility::LogError(
-                "NearestNeighborSearch::FixedRadiusIndex Index is not set.");
+        utility::LogError("NearestNeighborSearch::KnnIndex is not set.");
     }
 
-    core::Tensor indices, distance, counts;
-    std::tie(indices, distance, counts) =
-            tree.HybridSearch(points, radius, max_nn);
+    core::Tensor indices, distance;
+    std::tie(indices, distance) = tree.KnnSearch(points, max_nn);
+
+    int64_t neighbour_count = indices.GetShape()[1];
+    if (neighbour_count < 4) {
+        utility::LogError(
+                " Not enough neighbours found for computing Color Gradients.");
+    }
 
     DISPATCH_FLOAT_DTYPE_TO_TEMPLATE(dtype, [&]() {
         auto points_ptr = points.GetDataPtr<scalar_t>();
         auto neighbour_indices_ptr = indices.GetDataPtr<int64_t>();
-        auto neighbour_counts_ptr = counts.GetDataPtr<int64_t>();
+        // auto neighbour_counts_ptr = counts.GetDataPtr<int64_t>();
         auto covariances_ptr = covariances.GetDataPtr<scalar_t>();
 
         core::kernel::cuda_launcher::ParallelFor(
@@ -425,8 +439,8 @@ void EstimateCovariancesCUDA(const core::Tensor& points,
                     // NNS [Hybrid Search].
                     int64_t neighbour_offset = max_nn * workload_idx;
                     // Count of valid correspondences per point.
-                    int64_t neighbour_count =
-                            neighbour_counts_ptr[workload_idx];
+                    // int64_t neighbour_count =
+                    // neighbour_counts_ptr[workload_idx];
                     // Covariance is of shape {3, 3}, so it has an offset factor
                     // of 9 x workload_idx.
                     int64_t covariances_offset = 9 * workload_idx;
