@@ -16,8 +16,7 @@ function run_benchmark {
 
     # Pick tensor-related benchmarks
     # If one benchmark used multiple times with different parameters, pick only one of them
-    BENCHMARK_FILTER=""
-    BENCHMARK_FILTER="${BENCHMARK_FILTER}|HashInsertInt/HashmapBackend::TBB_1000000_1"
+    BENCHMARK_FILTER="HashInsertInt3/HashmapBackend::TBB_1000000_32"
     BENCHMARK_FILTER="${BENCHMARK_FILTER}|FromLegacyPointCloud"
     BENCHMARK_FILTER="${BENCHMARK_FILTER}|ToLegacyPointCloud"
     BENCHMARK_FILTER="${BENCHMARK_FILTER}|VoxelDownSample/core::HashmapBackend::TBB_0_01"
