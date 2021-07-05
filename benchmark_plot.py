@@ -109,7 +109,7 @@ if __name__ == '__main__':
     plt.ylabel("Runtime geometric mean (ms)")
 
     plt.subplot(212)
-    log_file = pwd / "benchmark_18_core.log"
+    log_file = pwd / "benchmark_18_core_1_dummy.log"
     results = parse_file(log_file)
     xs = [result["num_threads"] for result in results]
     ys = [result["gmean"] for result in results]

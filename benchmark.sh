@@ -10,6 +10,9 @@ pushd ${BUILD_DIR}
 # Build
 make benchmarks -j${NPROC}
 
+# Run
+./bin/examples/CPUConsumer &
+
 # Create an empty output file
 # Subsequent outputs will be appended
 OUT_FILE=${BUILD_DIR}/benchmark.log
@@ -39,5 +42,7 @@ do
 
     echo "######################################" >> ${OUT_FILE}
 done
+
+pkill CPUConsumer
 
 popd
