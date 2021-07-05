@@ -27,17 +27,28 @@ OUT_FILE=${BUILD_DIR}/benchmark.log
 rm -rf ${OUT_FILE}
 touch ${OUT_FILE}
 
+# Run all tensor-related benchmarks
+BENCHMARK_FILTER="FromLegacyPointCloud|ToLegacyPointCloud|VoxelDownSample/core|Odometry|RegistrationICP"
+
 # Benchmark
 echo "Running benchmarks from 1 to ${NPROC} threads."
 for (( i = ${NPROC} ; i >= 1 ; i-- ));
 do
+    echo "######################################" >> ${OUT_FILE}
+
     export OMP_NUM_THREADS=${i}
     echo "# OMP_NUM_THREADS: ${OMP_NUM_THREADS}"
+
+    if [[ ${OMP_NUM_THREADS} = ${NPROC} ]]; then
+        # Don't specify OMP_NUM_THREADS if it is the maximum already
+        echo "special"
+        ./bin/benchmarks --benchmark_filter=${BENCHMARK_FILTER} >> ${OUT_FILE} 2>&1
+    else
+        echo "regular"
+        OMP_NUM_THREADS=${OMP_NUM_THREADS} ./bin/benchmarks --benchmark_filter=${BENCHMARK_FILTER} >> ${OUT_FILE} 2>&1
+    fi
+
     echo "######################################" >> ${OUT_FILE}
-    echo "# OMP_NUM_THREADS: ${OMP_NUM_THREADS}" >> ${OUT_FILE}
-    OMP_NUM_THREADS=${OMP_NUM_THREADS} ./bin/benchmarks --benchmark_filter="Zeros|Reduction|Voxel|Odometry|RegistrationICP" >> ${OUT_FILE} 2>&1
-    echo "######################################" >> ${OUT_FILE}
-    command
 done
 
 popd
