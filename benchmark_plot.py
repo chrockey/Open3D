@@ -55,15 +55,13 @@ def match_runtime(line):
 
 def parse_file(log_file):
     """
-    Returns: (xs, ys)
-        xs: num_threads
-        ys: geometric mean of runtime (ms)
+    Returns: results, a list of directories, e.g.
+        [
+            {"num_threads": xxx, "gmean": xxx, "ICP": xxx, "Tensor": xxx},
+            {"num_threads": xxx, "gmean": xxx, "ICP": xxx, "Tensor": xxx},
+        ]
     """
-    # Store results in dict
-    # result[1] = runtime of 1 threads
-    # result[2] = runtime of 2 threads
-    results = dict()
-
+    results = []
     with open(log_file) as f:
         lines = [line.strip() for line in f.readlines()]
 
@@ -77,7 +75,10 @@ def parse_file(log_file):
             if num_thread:
                 # If we already collected, save
                 if current_num_thread:
-                    results[current_num_thread] = gmean(current_runtimes)
+                    results.append({
+                        "num_threads": current_num_thread,
+                        "gmean": gmean(current_runtimes)
+                    })
                 # Reset to fresh
                 current_num_thread = num_thread
                 runtime = []
@@ -86,15 +87,11 @@ def parse_file(log_file):
 
         # Save the last set of data
         if current_num_thread:
-            results[current_num_thread] = gmean(current_runtimes)
-
-    xs = []
-    ys = []
-    for key in results:
-        xs.append(key)
-        ys.append(results[key])
-
-    return xs, ys
+            results.append({
+                "num_threads": current_num_thread,
+                "gmean": gmean(current_runtimes)
+            })
+    return results
 
 
 if __name__ == '__main__':
@@ -102,7 +99,9 @@ if __name__ == '__main__':
 
     plt.subplot(211)
     log_file = pwd / "benchmark_4_core.log"
-    xs, ys = parse_file(log_file)
+    results = parse_file(log_file)
+    xs = [result["num_threads"] for result in results]
+    ys = [result["gmean"] for result in results]
     plt.plot(xs, ys, 'b-')
     plt.title("Intel(R) Core(TM) i5-8265U (4 cores/8 threads)")
     plt.xticks(np.arange(min(xs), max(xs) + 1, 1.0))
@@ -111,7 +110,9 @@ if __name__ == '__main__':
 
     plt.subplot(212)
     log_file = pwd / "benchmark_18_core.log"
-    xs, ys = parse_file(log_file)
+    results = parse_file(log_file)
+    xs = [result["num_threads"] for result in results]
+    ys = [result["gmean"] for result in results]
     plt.plot(xs, ys, 'b-')
     plt.title("Intel(R) Core(TM) i9-10980XE (18 cores/36 threads)")
     plt.xticks(np.arange(min(xs), max(xs) + 1, 1.0))
