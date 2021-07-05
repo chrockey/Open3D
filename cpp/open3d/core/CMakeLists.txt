@@ -7,6 +7,7 @@ target_sources(core PRIVATE
     EigenConverter.cpp
     Indexer.cpp
     MemoryManager.cpp
+    MemoryManagerCached.cpp
     MemoryManagerCPU.cpp
     MemoryManagerStatistic.cpp
     NumpyIO.cpp
